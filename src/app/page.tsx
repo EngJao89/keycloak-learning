@@ -1,7 +1,24 @@
-export default function Home() {
+"use client";
+
+import { useKeycloak } from "@react-keycloak/ssr";
+
+export default function AuthButton() {
+  const { keycloak, initialized } = useKeycloak();
+
+  if (!initialized) return <p>Carregando...</p>;
+
+  if (keycloak?.authenticated) {
+    return (
+      <div>
+        <p>Olá, {keycloak.tokenParsed?.preferred_username}!</p>
+        <button onClick={() => keycloak.logout()}>Sair</button>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <h1>Auth Keycloak</h1>
+    <div>
+      <button onClick={() => keycloak?.login()}>Entrar com Keycloak</button>
     </div>
   );
 }
