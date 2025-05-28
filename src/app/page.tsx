@@ -1,24 +1,27 @@
 "use client";
 
-import { useKeycloak } from "@react-keycloak/ssr";
+import { useAuth } from 'react-oidc-context';
+
 
 export default function AuthButton() {
-  const { keycloak, initialized } = useKeycloak();
+  const auth = useAuth();
+  
+  if (auth.isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  if (!initialized) return <p>Carregando...</p>;
+  if (auth.error) {
+    return <div>Oops... {auth.error.message}</div>;
+  }
 
-  if (keycloak?.authenticated) {
+  if (auth.isAuthenticated) {
     return (
       <div>
-        <p>Olá, {keycloak.tokenParsed?.preferred_username}!</p>
-        <button onClick={() => keycloak.logout()}>Sair</button>
+        Hello {auth.user?.profile.name}!
+        <button onClick={() => auth.signoutRedirect()}>Log out</button>
       </div>
     );
   }
 
-  return (
-    <div>
-      <button onClick={() => keycloak?.login()}>Entrar com Keycloak</button>
-    </div>
-  );
+  return <button onClick={() => auth.signinRedirect()}>Log in</button>;
 }

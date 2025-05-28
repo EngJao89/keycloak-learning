@@ -1,15 +1,23 @@
 "use client";
 
-import { SSRKeycloakProvider, cookiesPersistor } from "@react-keycloak/ssr";
-import { keycloak } from "@/lib/keycloak";
+import { AuthProvider } from 'react-oidc-context';
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
+const oidcConfig = {
+  authority: process.env.NEXT_PUBLIC_KEYCLOAK_URL + "/realms/" + process.env.NEXT_PUBLIC_KEYCLOAK_REALM,
+  client_id: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID,
+  redirect_uri: "http://localhost:3000/callback", 
+  response_type: "code",
+  scope: "openid profile email",
+  automaticSilentRenew: true,
+  onSigninCallback: () => {
+    window.history.replaceState({}, "", window.location.pathname);
+  },
+};
+
+export default function OIDCProvider({ children }: { children: React.ReactNode }) {
   return (
-    <SSRKeycloakProvider
-      keycloakConfig={keycloak}
-      persistor={cookiesPersistor()}
-    >
+    <AuthProvider {...oidcConfig}>
       {children}
-    </SSRKeycloakProvider>
+    </AuthProvider>
   );
 }
